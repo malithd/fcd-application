@@ -1,0 +1,12 @@
+{"namespace": "org.tum.idp.fcd",
+ "type": "record",
+ "name": "FcdTaxiEvent",
+ "fields": [
+     {"name": "mid", "type": "string"},
+     {"name": "timestamp", "type": "long"},
+     {"name": "lon", "type": "double"},
+     {"name": "lat", "type": "double"},
+     {"name": "speed", "type": "double"},
+     {"name": "tmc_code", "type": "int"}
+ ]
+}

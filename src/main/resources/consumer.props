@@ -1,0 +1,12 @@
+bootstrap.servers=localhost:9092
+group.id=fcd-messages
+auto.offset.reset=earliest
+enable.auto.commit=true
+key.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+
+session.timeout.ms=10000
+
+fetch.min.bytes=50000
+receive.buffer.bytes=262144
+max.partition.fetch.bytes=2097152

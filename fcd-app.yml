@@ -1,0 +1,153 @@
+version: '3.2'
+services:
+    zookeeper:
+        build:
+            context: ./fcd-app-zookeeper
+        image: tumidp/fcd-app-zookeeper
+        hostname: zookeeper
+        container_name: fcd-app-zookeeper
+        environment:
+            - MYID=1
+#            - INIT_DAEMON_STEP=setup_zookeeper
+#            - INIT_DAEMON_BASE_URI=http://backend/init-daemon 
+#            - ENABLE_INIT_DAEMON=true
+        expose:
+            - "2181"
+        ports:
+            - "2181:2181"
+    kafka:
+        build:
+            context: ./fcd-app-kafka
+        image: tumidp/fcd-app-kafka
+        hostname: kafka
+        container_name: fcd-app-kafka
+        environment:
+            - SERVICE_PRECONDITION=zookeeper:2181
+            - ZOOKEEPER_SERVERS=zookeeper:2181
+#            - INIT_DAEMON_STEP=setup_kafka
+#            - ENABLE_INIT_DAEMON=true
+            - INITIAL_TOPICS="fcd-messages"
+#            - INIT_DAEMON_BASE_URI=http://backend/init-daemon 
+        depends_on:
+            - zookeeper
+        expose:
+            - "9092"
+#-----------------------------------------------------------------------------
+    flink-master:
+        image: bde2020/flink-master:1.4.0-hadoop2.7
+        hostname: flink-master
+        container_name: fcd-app-flink-master
+        expose:
+            - "8081"
+            - "8080"
+        environment:
+            SERVICE_PRECONDITION: "resourcemanager:8088"
+            CSS_SOURCE: "flink-dashboard"
+            ENABLE_INIT_DAEMON: "false"
+            INIT_DAEMON_STEP: "setup_flink"
+            VIRTUAL_HOST: flink-master.tum-idp.local
+            VIRTUAL_PORT: "8081"
+
+    flink-worker:
+        image: bde2020/flink-worker:1.4.0-hadoop2.7
+        hostname: flink-worker
+        container_name: fcd-app-flink-worker
+        environment:
+            SERVICE_PRECONDITION: "flink-master:8081"
+            FLINK_MASTER_PORT_6123_TCP_ADDR: "flink-master"
+            FLINK_NUM_TASK_SLOTS: "2"
+            CSS_SOURCE: "flink-dashboard"
+            ENABLE_INIT_DAEMON: "false"
+            VIRTUAL_HOST: flink-worker.tum-idp.local
+            VIRTUAL_PORT: "8080"
+        depends_on:
+              - flink-master
+
+    producer:
+        image: tumidp/fcd-app-producer
+        hostname: producer
+        container_name: fcd-app-producer
+        build:
+            context: .
+            dockerfile: fcd-producer.dockerfile
+        environment:
+            SERVICE_PRECONDITION: "flink-master:8081 kafka:9092"
+            FLINK_MASTER: "flink-master"
+            REQUEST_SLOTS: 1
+            HDFS_URL: hdfs://namenode:8020
+            ENABLE_INIT_DAEMON: "false"
+            INIT_DAEMON_STEP: floating_producer
+            FLINK_MASTER_PORT_6123_TCP_ADDR: "flink-master"
+            FLINK_MASTER_PORT_6123_TCP_PORT: "6123"
+            FLINK_APPLICATION_ARGS: "--app_id *** --app_code ***  --bbox '48.160250,11.551678;48.159462,11.558652'"
+            INIT_DAEMON_BASE_URI: "http://backend/init-daemon"
+
+    consumer:
+        image: tumidp/fcd-app-consumer
+        hostname: consumer
+        container_name: fcd-app-consumer
+        build:
+            context: .
+            dockerfile: fcd-consumer.dockerfile
+        environment:
+            SERVICE_PRECONDITION: "kafka:9092 elasticsearch:9200"
+            FLINK_MASTER: "flink-master"
+            REQUEST_SLOTS: 1
+            HDFS_URL: hdfs://namenode:8020
+            ENABLE_INIT_DAEMON: "false"
+            INIT_DAEMON_STEP: floating_consumer
+            FLINK_MASTER_PORT_6123_TCP_ADDR: "flink-master"
+            FLINK_MASTER_PORT_6123_TCP_PORT: "6123"
+            INIT_DAEMON_BASE_URI: "http://backend/init-daemon"
+
+#-----------------------------------------------------------------------------
+    elasticsearch:
+        image: tumidp/fcd-app-elasticsearch
+        hostname: elasticsearch
+        container_name: fcd-app-elasticsearch
+        build:
+            context: fcd-app-elasticsearch/
+        environment:
+            VIRTUAL_HOST: elasticsearch.tum-idp.local
+            VIRTUAL_PORT: "9200"
+        ports:
+            - 9200:9200
+            - 9300:9300
+
+    kibana:
+        image: kibana:4.6.6
+        hostname: kibana
+        container_name: fcd-app-kibana
+        environment:
+            ELASTICSEARCH_URL: http://elasticsearch:9200
+            VIRTUAL_HOST: kibana.tum-idp.local
+            VIRTUAL_PORT: "5601"
+        ports:
+            - 5601:5601
+
+#--------------------------------------------------------------------------------
+    integratorui:
+        build:
+            context: .
+            dockerfile: integratorui.dockerfile
+        image: tumidp/fcd-app-integratorui
+        hostname: integratorui
+        container_name: fcd-app-integratorui
+        environment:
+            VIRTUAL_HOST: demo.tum-idp.local
+
+    csswrapper:
+        image: tumidp/fcd-app-csswrapper
+        hostname: csswrapper
+        container_name: fcd-app-csswrapper
+        build:
+            context: .
+            dockerfile: csswrapper.dockerfile
+        ports:
+            - 80:80
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+networks:
+    default:
+        driver: overlay
+

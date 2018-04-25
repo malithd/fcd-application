@@ -1,0 +1,19 @@
+i{ "data": [
+  {
+    "id": 1,
+    "type": "user-interfaces",
+    "attributes": {
+      "label": "Apache Flink Dashboard",
+      "base-url": "http://flink-master.tum-idp.local"
+    }
+  },
+  {
+    "id": 2,
+    "type": "user-interfaces",
+    "attributes": {
+      "label": "Kibana",
+      "base-url": "http://kibana.fcd-idp.local",
+      "append-path": ""
+    }
+  }]
+}

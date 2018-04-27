@@ -41,7 +41,6 @@ services:
             - "8081"
             - "8080"
         environment:
-            SERVICE_PRECONDITION: "resourcemanager:8088"
             CSS_SOURCE: "flink-dashboard"
             ENABLE_INIT_DAEMON: "false"
             INIT_DAEMON_STEP: "setup_flink"
@@ -53,7 +52,6 @@ services:
         hostname: flink-worker
         container_name: fcd-app-flink-worker
         environment:
-            SERVICE_PRECONDITION: "flink-master:8081"
             FLINK_MASTER_PORT_6123_TCP_ADDR: "flink-master"
             FLINK_NUM_TASK_SLOTS: "2"
             CSS_SOURCE: "flink-dashboard"
@@ -79,7 +77,7 @@ services:
             INIT_DAEMON_STEP: floating_producer
             FLINK_MASTER_PORT_6123_TCP_ADDR: "flink-master"
             FLINK_MASTER_PORT_6123_TCP_PORT: "6123"
-            FLINK_APPLICATION_ARGS: "--app_id *** --app_code ***  --bbox '48.160250,11.551678;48.159462,11.558652'"
+            FLINK_APPLICATION_ARGS: "--app_id *** --app_code ***  --bbox 48.160250,11.551678;48.159462,11.558652"
             INIT_DAEMON_BASE_URI: "http://backend/init-daemon"
 
     consumer:

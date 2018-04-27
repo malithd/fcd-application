@@ -145,7 +145,8 @@ public class FlinkFcdEventConsumer {
         config.put("cluster.name", "elasticsearch");
 
         List<InetSocketAddress> transportAddresses = new ArrayList<>();
-        transportAddresses.add(new InetSocketAddress(InetAddress.getByName("localhost"), 9300));
+        //transportAddresses.add(new InetSocketAddress(InetAddress.getByName("localhost"), 9300));
+        transportAddresses.add(new InetSocketAddress(InetAddress.getByName("elasticsearch"), 9300));
 
         inputStream.addSink(new ElasticsearchSink<Tuple5<Integer, Double, Double, Double, String>>(config, transportAddresses,
                 new ElasticsearchSinkFunction<Tuple5<Integer, Double, Double, Double, String>>() {

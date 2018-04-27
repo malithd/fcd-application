@@ -10,8 +10,8 @@ COPY healthcheck /
 COPY elasticsearch-schema.json /
 COPY elasticsearch-startup.sh /
 
-#RUN chmod +x /healthcheck
-#RUN chmod +x /elasticsearch-startup.sh
+RUN chmod +x /healthcheck
+RUN chmod +x /elasticsearch-startup.sh
 
 #RUN sysctl -w vm.max_map_count=262144
 

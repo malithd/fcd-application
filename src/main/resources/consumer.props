@@ -1,4 +1,4 @@
-bootstrap.servers=localhost:9092
+bootstrap.servers=kafka:9092
 group.id=fcd-messages
 auto.offset.reset=earliest
 enable.auto.commit=true

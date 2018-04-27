@@ -30,4 +30,10 @@ COPY finish-step.sh /
 COPY healthcheck /
 COPY zookeeper-startup.sh /
 
+RUN chmod +x /zookeeper-startup.sh
+RUN chmod +x /wait-for-step.sh
+RUN chmod +x /execute-step.sh
+RUN chmod +x /finish-step.sh
+RUN chmod +x /healthcheck
+
 CMD [ "./zookeeper-startup.sh" ]

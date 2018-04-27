@@ -11,6 +11,10 @@ COPY entrypoint.sh /
 
 EXPOSE 9092
 
+RUN chmod +x /entrypoint.sh
+RUN chmod +x /healthcheck
+RUN chmod +x /kafka-startup.sh
+
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD [ "./kafka-startup.sh" ]

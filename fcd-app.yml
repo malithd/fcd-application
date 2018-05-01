@@ -8,9 +8,6 @@ services:
         container_name: fcd-app-zookeeper
         environment:
             - MYID=1
-#            - INIT_DAEMON_STEP=setup_zookeeper
-#            - INIT_DAEMON_BASE_URI=http://backend/init-daemon 
-#            - ENABLE_INIT_DAEMON=true
         expose:
             - "2181"
         ports:
@@ -24,10 +21,7 @@ services:
         environment:
             - SERVICE_PRECONDITION=zookeeper:2181
             - ZOOKEEPER_SERVERS=zookeeper:2181
-#            - INIT_DAEMON_STEP=setup_kafka
-#            - ENABLE_INIT_DAEMON=true
             - INITIAL_TOPICS="fcd-messages"
-#            - INIT_DAEMON_BASE_URI=http://backend/init-daemon 
         depends_on:
             - zookeeper
         expose:
@@ -124,16 +118,6 @@ services:
             - 5601:5601
 
 #--------------------------------------------------------------------------------
-    integratorui:
-        build:
-            context: .
-            dockerfile: integratorui.dockerfile
-        image: tumidp/fcd-app-integratorui
-        hostname: integratorui
-        container_name: fcd-app-integratorui
-        environment:
-            VIRTUAL_HOST: demo.tum-idp.local
-
     csswrapper:
         image: tumidp/fcd-app-csswrapper
         hostname: csswrapper

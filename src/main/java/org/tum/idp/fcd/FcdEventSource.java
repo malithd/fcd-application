@@ -18,23 +18,26 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/*
+ * This implements Flink SourceFunction and includes the logic for fetching data from Here traffic flow API and
+ * parsing the response Json to generate FcdEvent object
+ */
 public class FcdEventSource implements SourceFunction<FcdEvent> {
     private static final Logger log = LoggerFactory.getLogger(FcdEventSource.class);
     private final String url;
 
     private transient HttpURLConnection con = null;
-    private transient JsonParser parser = null;
 
     private static final Map<String, GeoPoint> coordinateMap = new ConcurrentHashMap<>();
     private volatile boolean isRunning;
 
     private transient DateTimeFormatter timeFormatter = null;
 
-    public void addEntry(String tmcCode, GeoPoint geoPoint) {
+    private void addEntry(String tmcCode, GeoPoint geoPoint) {
         coordinateMap.put(tmcCode, geoPoint);
     }
 
-    public GeoPoint getGeoPoint(String tmcCode) {
+    private GeoPoint getGeoPoint(String tmcCode) {
         return coordinateMap.get(tmcCode);
     }
 
@@ -46,7 +49,7 @@ public class FcdEventSource implements SourceFunction<FcdEvent> {
     @Override
     public void run(SourceContext<FcdEvent> sourceContext) throws Exception {
         URL obj = new URL(url);
-        parser = new JsonParser();
+        JsonParser parser = new JsonParser();
         timeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
         GeoPoint pointA = new GeoPoint(48.15980, 11.56305);
         addEntry("27944", pointA);
@@ -82,7 +85,7 @@ public class FcdEventSource implements SourceFunction<FcdEvent> {
     /*
      * Creates one event from a json string
      */
-    public void generateEvent(String jsonString, SourceContext<FcdEvent> sourceContext, JsonParser parser) {
+    private void generateEvent(String jsonString, SourceContext<FcdEvent> sourceContext, JsonParser parser) {
         JsonElement element = parser.parse(jsonString);
         JsonObject jsonRecord = element.getAsJsonObject();
         JsonArray rwsList = jsonRecord.get("RWS").getAsJsonArray();

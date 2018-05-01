@@ -6,6 +6,10 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer010;
 
+/*
+ * Flink producer task to fetch data from HERE traffic flow API in every 1 minute
+ * and sink them in to Kafka topic called "fcd-messages"
+ */
 public class FlinkFcdEventProducer {
 
     private static final String KAFKA_BROKER = "kafka:9092";
@@ -16,9 +20,9 @@ public class FlinkFcdEventProducer {
             throw new IllegalArgumentException("Must have either 'appid' or 'appcode' or 'bbox' as first argument. \n");
         }
 
-        String appId = params.getRequired("app_id");
-        String appCode = params.getRequired("app_code");
-        String bboxInput = params.get("bbox");
+        String appId = params.getRequired(Constants.APP_ID_PARAM_NAME);
+        String appCode = params.getRequired(Constants.APP_CODE_PARAM_NAME);
+        String bboxInput = params.get(Constants.BBOX_PARAM_NAME);
         String bbox = (bboxInput == null) ? "48.160250,11.551678;48.159462,11.558652" : bboxInput;
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -28,7 +32,7 @@ public class FlinkFcdEventProducer {
         //taxiEventStream.print();
         FlinkKafkaProducer010<FcdEvent> producer = new FlinkKafkaProducer010<>(
                 KAFKA_BROKER,
-                "fcd-messages",
+                Constants.KAFKA_TOPIC_PARAM_VALUE,
                 new FcdEventSchema());
         eventStream.addSink(producer);
         env.execute("Ingestion of HERE FCD Traffic Flow Data");

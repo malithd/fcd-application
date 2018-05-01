@@ -1,8 +1,8 @@
 package org.tum.idp.fcd;
 
 public class GeoPoint {
-    private double latitude = 0.0;
-    private double longitude = 0.0;
+    private double latitude;
+    private double longitude;
 
     public GeoPoint(double latitude, double longitude) {
         this.latitude = latitude;
@@ -16,5 +16,4 @@ public class GeoPoint {
     public double getLongitude() {
         return longitude;
     }
-
 }

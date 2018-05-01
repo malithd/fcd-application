@@ -4,6 +4,7 @@ import com.google.common.io.Resources;
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -28,13 +29,21 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
+/*
+ * Flink consumer task to subscribe to topic called "fcd-messages" and aggregate them in given window time and
+ * calculate the average speed and sink in to elastic search
+ */
 public class FlinkFcdEventConsumer {
 
-    private static String KAFKA_TOPIC_PARAM_VALUE = "fcd-messages";
-    private static int TIME_WINDOW_PARAM_VALUE = 5;
     private static final int MAX_EVENT_DELAY = 60;
 
     public static void main(String[] args) throws Exception {
+
+        ParameterTool params = ParameterTool.fromArgs(args);
+        if (params.getNumberOfParameters() < 1) {
+            throw new IllegalArgumentException("Missing window argument. \n");
+        }
+        int timeWindow = params.getInt(Constants.TIME_WINDOW_PARAM_NAME);
 
         Properties properties;
 
@@ -48,8 +57,8 @@ public class FlinkFcdEventConsumer {
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
         // create a Kafka consumer
-        FlinkKafkaConsumer010<FcdEvent> consumer = new FlinkKafkaConsumer010<FcdEvent>(
-                KAFKA_TOPIC_PARAM_VALUE,
+        FlinkKafkaConsumer010<FcdEvent> consumer = new FlinkKafkaConsumer010<>(
+                Constants.KAFKA_TOPIC_PARAM_VALUE,
                 new FcdEventSchema(),
                 properties);
 
@@ -68,7 +77,7 @@ public class FlinkFcdEventConsumer {
                 });
 
         DataStream<Tuple5<Integer, Double, Double, Double, String>> result = keyedEdits
-                .timeWindow(Time.minutes(TIME_WINDOW_PARAM_VALUE))
+                .timeWindow(Time.minutes(timeWindow))
                 .apply(new CalculateAverage());
 
         //result.print();
@@ -134,11 +143,8 @@ public class FlinkFcdEventConsumer {
 
     /**
      * Stores the data in Elasticsearch
-     *
-     * @param inputStream
-     * @throws UnknownHostException
      */
-    public static void saveFcdEventDataToES(
+    private static void saveFcdEventDataToES(
             DataStream<Tuple5<Integer, Double, Double, Double, String>> inputStream) throws UnknownHostException {
         Map<String, String> config = new HashMap<>();
         config.put("bulk.flush.max.actions", "1");

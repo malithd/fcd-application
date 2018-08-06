@@ -106,15 +106,17 @@ public class FcdEventSource implements SourceFunction<FcdEvent> {
                         JsonElement tmc = fiRecord.get("TMC");
                         String tmcCode = tmc.getAsJsonObject().get("PC").getAsString();
                         GeoPoint geoPoint = getGeoPoint(tmcCode);
-                        JsonArray fiDataList = fiRecord.get("CF").getAsJsonArray();
-                        for (JsonElement fiData : fiDataList) {
-                            JsonObject fiDataRecord = fiData.getAsJsonObject();
-                            event.setSpeed(fiDataRecord.getAsJsonObject().get("SP").getAsDouble());
-                            event.setTmcCode(Integer.valueOf(tmcCode));
-                            event.setLat(geoPoint.getLatitude());
-                            event.setLon(geoPoint.getLongitude());
-                            log.info("Adding new Event ----------------------------------------------------------------");
-                            sourceContext.collectWithTimestamp(event, event.getTimestamp());
+                        if(geoPoint != null) {
+                            JsonArray fiDataList = fiRecord.get("CF").getAsJsonArray();
+                            for (JsonElement fiData : fiDataList) {
+                                JsonObject fiDataRecord = fiData.getAsJsonObject();
+                                event.setSpeed(fiDataRecord.getAsJsonObject().get("SP").getAsDouble());
+                                event.setTmcCode(Integer.valueOf(tmcCode));
+                                event.setLat(geoPoint.getLatitude());
+                                event.setLon(geoPoint.getLongitude());
+                                log.info("Adding new Event ----------------------------------------------------------------");
+                                sourceContext.collectWithTimestamp(event, event.getTimestamp());
+                            }
                         }
                     }
                 }

@@ -3,7 +3,8 @@
 ## What is this?
 
 This application is a real-time analytics use-case using HERE traffic API based on big data analytics component stack developed under Big Data Europe project. It fetches FCD data (Floating Car Data) continuously of a small area in Munich from HERE traffic API. A Flink Producer connects to HERE flow traffic API and sends the data into a Kafka topic. The data is consumed by a Flink job, aggregates data in given time window(default 5 minutes) and enriched using a function by calculating average speed then stores into Elasticsearch. A visualization based on Kibana is used to visualize the aggregated data in a map (average speed in road segments per time windows).
-![Alt text](images/fcd-diag.png?raw=true "Architecture Diagram of Realtime FCD Application with HERE Traffic API")
+
+![Architecture Diagram of Realtime FCD Application with HERE Traffic API](images/fcd-diag.png?raw=true "Architecture Diagram of Realtime FCD Application with HERE Traffic API")
 
 This is application will be using following docker containers from big data europe project to create this pipeline,
 
@@ -82,12 +83,19 @@ The time window is configurable, by default it is 5 minutes and you can change i
 
  - Run command docker-compose -f fcd-app.yml up
  This will start the docker containers of all the components. Go to flink-master.tum-idp.local URL in browser to view Flink management UI.
- ![Alt text](images/flink-rt.png?raw=true "Flink Management UI")
+ 
+ ![Flink Management UI](images/flink-rt.png?raw=true "Flink Management UI")
+ 
  - Go to Kibana UI (kibana.tum-idp.local) and index pattern must be defined so that Kibana can find and retrieve the data from Elasticsearch and index name is "munich" as in the path used to create the index.
- ![Alt text](images/kibana-config-ui.png?raw=true "Kibana Config UI")
+ 
+ !["Kibana Config UI](images/kibana-config-ui.png?raw=true "Kibana Config UI")
+ 
  - Then go to “Discover” and define a date range to filter data.
-![Alt text](images/kibana-table.png?raw=true "Kibana Search UI")
+ 
+![Kibana Search UI](images/kibana-table.png?raw=true "Kibana Search UI")
+
  - Then go to visualize tab and create a “Tile Map” visualization to view data in the map.
+ 
  Elasticsearch provides a web map server (WMS) that is used by default in Kibana. The default WMS doesn't allow to zoom beyond a certain level. So you cannot view road level map. A more detailed view can be achieved using other WMS like [Mundialis WMS](https://www.mundialis.de/en/ows-mundialis/). The default WMS can be changed in the 'Options' of the Tile Map visualization from “WMS compliant map server” setting set the following.
  
 				WMS url: http://ows.mundialis.de/services/service 24
@@ -95,4 +103,5 @@ The time window is configurable, by default it is 5 minutes and you can change i
 				WMS version: 1.3.0
 				WMS format: image/png
 
-![Alt text](images/kibana-rt-ui.png?raw=true "Kibana Visualize UI")
+
+![Kibana Visualize UI](images/kibana-rt-ui.png?raw=true "Kibana Visualize UI")
